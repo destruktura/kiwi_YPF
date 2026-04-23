@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Presupuesto Interactivo · Kiwi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--black:#0a0a0a;--dark:#111;--card:#1a1a1a;--border:#3a3a3a;--white:#f5f5f5;--muted:#aaa;--orange:#2187f4;--blue:#ff5000;}
+body{font-family:'Inter',sans-serif;background:var(--black);color:var(--white);min-height:100vh;}
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 3rem;background:rgba(10,10,10,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);}
+.nav-logo{font-size:.9rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);}
+.nav-sub{font-size:.75rem;color:var(--muted);}
+.main{display:grid;grid-template-columns:1fr 360px;gap:2rem;max-width:1100px;margin:0 auto;padding:3rem 2rem;align-items:start;}
+.section-title{font-size:2rem;font-weight:900;letter-spacing:-.02em;margin-bottom:.3rem;}
+.section-sub{font-size:.85rem;color:var(--muted);margin-bottom:1.5rem;line-height:1.3;}
+.combos-label{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.6rem;}
+.combos{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:2rem;}
+.combo-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:.4rem .9rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:'Inter',sans-serif;transition:all .2s;}
+.combo-btn:hover{border-color:var(--orange);color:var(--orange);}
+.items-list{display:flex;flex-direction:column;gap:.8rem;}
+.item{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;}
+.item.active{border-color:var(--orange);}
+.item-header{display:flex;align-items:center;gap:.8rem;padding:1.1rem 1.4rem;cursor:pointer;user-select:none;}
+.chk{width:20px;height:20px;border-radius:5px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.item.active .chk{background:var(--orange);border-color:var(--orange);}
+.chk-icon{display:none;}
+.item.active .chk-icon{display:block;}
+.item-meta{flex:1;min-width:0;}
+.item-code{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--orange);}
+.item-name{font-size:.95rem;font-weight:700;margin:.1rem 0;}
+.item-price-hint{font-size:.78rem;color:var(--muted);}
+.detail-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:.25rem .6rem;border-radius:4px;cursor:pointer;font-size:.7rem;font-weight:600;font-family:'Inter',sans-serif;white-space:nowrap;transition:all .2s;flex-shrink:0;}
+.detail-btn:hover{border-color:var(--orange);color:var(--orange);}
+.qty-row{display:flex;align-items:center;gap:.5rem;flex-shrink:0;}
+.qbtn{width:26px;height:26px;border-radius:50%;border:none;cursor:pointer;font-size:1rem;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Inter',sans-serif;}
+.qbtn.minus{background:var(--border);color:var(--white);}
+.qbtn.plus{background:var(--orange);color:#fff;}
+.qnum{font-size:.95rem;font-weight:800;min-width:18px;text-align:center;}
+.item-desc{padding:0 1.4rem;overflow:hidden;max-height:0;transition:max-height .3s ease,padding .3s ease;}
+.item-desc.open{max-height:200px;padding-bottom:1rem;}
+.item-desc p{font-size:.8rem;color:var(--muted);line-height:1.4;margin-bottom:.25rem;}
+.subopts{border-top:1px solid var(--border);padding:1rem 1.4rem;display:none;}
+.subopts.show{display:block;}
+.subopts-label{font-size:.62rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:.7rem;}
+.subopt{display:flex;align-items:center;gap:.7rem;padding:.6rem .8rem;border-radius:8px;border:1px solid var(--border);margin-bottom:.5rem;cursor:pointer;transition:all .2s;}
+.subopt:hover{border-color:rgba(33,135,244,.4);}
+.subopt.active{border-color:var(--orange);background:rgba(33,135,244,.05);}
+.sub-chk{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.subopt.active .sub-chk{background:var(--orange);border-color:var(--orange);}
+.sub-chk-icon{display:none;}
+.subopt.active .sub-chk-icon{display:block;}
+.sub-info{flex:1;}
+.sub-name{font-size:.85rem;font-weight:600;}
+.sub-people{font-size:.72rem;color:var(--orange);}
+.sub-price{font-size:.82rem;font-weight:700;white-space:nowrap;}
+.panel{background:#0a1a3a;border:1px solid #2187f4;border-radius:16px;padding:1.8rem;position:sticky;top:90px;}
+.panel-title{font-size:1.2rem;font-weight:900;color:#2187f4;margin-bottom:1.2rem;}
+.panel-empty{font-size:.82rem;color:var(--muted);text-align:center;padding:1.5rem 0;}
+.panel-list{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.2rem;min-height:40px;}
+.pi{display:flex;justify-content:space-between;gap:.5rem;}
+.pi-name{font-size:.8rem;color:var(--white);flex:1;line-height:1.3;}
+.pi-price{font-size:.8rem;font-weight:700;white-space:nowrap;}
+.divider{height:1px;background:var(--border);margin:.8rem 0;}
+.panel-row{display:flex;justify-content:space-between;font-size:.82rem;color:var(--muted);margin-bottom:.4rem;}
+.panel-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:.3rem;}
+.ptl{font-size:.95rem;font-weight:700;}
+.ptv{font-size:1.7rem;font-weight:900;color:#2187f4;}
+.panel-note{font-size:.68rem;color:var(--muted);margin-top:.6rem;line-height:1.4;}
+.btn-print{display:block;width:100%;margin-top:1.2rem;padding:.9rem;background:linear-gradient(135deg,#2187f4,#0d5bbf);color:#fff;font-size:.85rem;font-weight:800;text-align:center;border:none;border-radius:10px;cursor:pointer;font-family:'Inter',sans-serif;transition:opacity .2s;}
+.btn-print:hover{opacity:.88;}
+.footer-note{font-size:.72rem;color:var(--muted);margin-top:2rem;line-height:1.6;max-width:600px;}
+.site-footer{background:var(--black);border-top:1px solid var(--border);padding:4rem 3rem;text-align:center;position:relative;overflow:hidden;}
+#footer-particles{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;}
+.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite;opacity:0;}
+@keyframes floatUp{0%{transform:translateY(100vh);opacity:0;}8%{opacity:.7;}90%{opacity:.25;}100%{transform:translateY(-8vh);opacity:0;}}
+.kiwi-on{font-size:clamp(1.5rem,4vw,3rem);font-weight:900;letter-spacing:-.02em;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:.5rem;position:relative;z-index:1;}
+.kiwi-on span{color:var(--orange);}
+.toggle-switch{display:inline-flex;width:64px;height:34px;background:var(--card);border:2px solid var(--border);border-radius:100px;padding:3px;align-items:center;cursor:pointer;transition:background .3s,border-color .3s,box-shadow .3s;flex-shrink:0;}
+.toggle-switch::after{content:'';width:24px;height:24px;background:rgba(255,255,255,.3);border-radius:50%;transition:transform .3s,background .3s;}
+.kiwi-on:hover .toggle-switch{background:var(--orange);border-color:var(--orange);box-shadow:0 0 30px rgba(33,135,244,.7);}
+.kiwi-on:hover .toggle-switch::after{transform:translateX(28px);background:#fff;}
+.site-footer-sub{font-size:.85rem;color:var(--muted);margin-bottom:2rem;position:relative;z-index:1;}
+.site-footer-copy{font-size:.72rem;color:var(--muted);margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--border);position:relative;z-index:1;}
+.site-footer img{position:relative;z-index:1;}
+@media(max-width:768px){
+  nav{padding:1rem 1.2rem;}
+  .main{grid-template-columns:1fr;padding:1.5rem 1rem;}
+  .panel{position:static;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="https://raw.githubusercontent.com/destruktura/kiwi_YPF/main/Recurso%206.png" style="height:36px;" alt="Kiwi"/>
+  <div style="text-align:right;">
+    <div class="nav-sub" style="margin-bottom:.3rem;">Innovación para el Upstream &amp; Gcia de Cultura, CI y cambio</div>
+    <img src="https://raw.githubusercontent.com/destruktura/kiwi_YPF/main/g1864.png" style="height:28px;filter:invert(1);" alt="YPF"/>
+  </div>
+</nav>
+
+<div class="main">
+  <div>
+    <h1 class="section-title">Armá tu programa</h1>
+    <p class="section-sub">Seleccioná los módulos que necesitás. Todos los precios son + IVA y valor unitario.</p>
+    <div class="combos-label">Combos rápidos</div>
+    <div class="combos">
+      <button class="combo-btn" onclick="applyCombo('basico',this)">Básico</button>
+      <button class="combo-btn" onclick="applyCombo('completo',this)">Completo</button>
+      <button class="combo-btn" onclick="applyCombo('eventos',this)">Eventos</button>
+      <button class="combo-btn" onclick="clearAll()">Limpiar todo</button>
+    </div>
+    <div class="items-list" id="items-list"></div>
+    <p class="footer-note">
+      Los números corresponden a presupuesto enero 2026. Los valores se indexarán por IPCBA a facturación.<br>
+      Modalidad de trabajo: Gantt a consensuar con el cliente a la contratación.<br>
+      Pago a 30 días de la contratación.<br>
+      Todos los valores consignados en el presupuesto son unitarios.
+    </p>
+  </div>
+
+  <div class="panel" style="background:#0a1a3a;border:1px solid #2187f4;">
+    <div class="panel-title" style="color:#2187f4;">Tu propuesta</div>
+    <div class="panel-list" id="panel-list"><p class="panel-empty">Agregá módulos para ver tu propuesta</p></div>
+    <div class="divider"></div>
+    <div class="panel-row"><span>Subtotal</span><span id="p-sub">$0</span></div>
+    <div class="panel-total-row"><span class="ptl">Total + IVA</span><span class="ptv" id="p-total" style="color:#2187f4;">$0</span></div>
+    <p class="panel-note">Precios en ARS + IVA. CABA y AMBA sin costo adicional de traslado.</p>
+    <button class="btn-print" style="background:linear-gradient(135deg,#2187f4,#0d5bbf);" onclick="window.print()">Imprimir / Guardar PDF</button>
+  </div>
+</div>
+
+<div class="site-footer">
+  <div id="footer-particles"></div>
+  <div class="kiwi-on">
+    Ponete en modo KIWI
+    <div class="toggle-switch"></div>
+    <span>ON</span>
+  </div>
+  <div class="site-footer-sub">Adoptá la IA. Transformá tu organización.</div>
+  <div style="display:flex;align-items:center;justify-content:center;gap:2.5rem;margin-top:2rem;flex-wrap:wrap;position:relative;z-index:1;">
+    <a href="https://kiwidevices.com" target="_blank" style="display:flex;align-items:center;gap:8px;color:#2187f4;text-decoration:none;font-size:.85rem;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#2187f4'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10z"/></svg>
+      kiwidevices.com
+    </a>
+    <a href="mailto:info@kiwidevices.com" style="display:flex;align-items:center;gap:8px;color:#2187f4;text-decoration:none;font-size:.85rem;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#2187f4'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      info@kiwidevices.com
+    </a>
+    <a href="https://instagram.com/kiwilearningarchitectures" target="_blank" style="display:flex;align-items:center;gap:8px;color:#2187f4;text-decoration:none;font-size:.85rem;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#2187f4'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      kiwilearningarchitectures
+    </a>
+    <a href="https://linkedin.com/company/kiwi-learning-architectures" target="_blank" style="display:flex;align-items:center;gap:8px;color:#2187f4;text-decoration:none;font-size:.85rem;transition:color .2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#2187f4'">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      Kiwi Learning Architectures
+    </a>
+  </div>
+  <img src="https://raw.githubusercontent.com/destruktura/kiwi_YPF/main/Recurso%206.png" style="height:40px;opacity:.6;margin-top:2rem;" alt="Kiwi"/>
+  <div class="site-footer-copy">© 2026 Kiwi Learning · Todos los derechos reservados</div>
+</div>
+
+<script>
+var data = [
+  {id:'discovery',code:'D1',name:'Discovery',desc:['Realización de entrevistas.','Entregables: arquitectura de aprendizaje + mapeo de formatos y recursos.','Única vez.'],price:4800000,subopts:null,qty:0},
+  {id:'kickoff',code:'KO',name:'Kick Off · Festival',desc:['PM, Producción, Post Producción, Facilitación.','Diseño y creación original para dinamizar el encuentro.','Espacio de estaciones inmersivas diseñadas y producidas por KIWI. Materiales incluidos.','4 facilitadores · 1 coordinador · 1 host: Martina Rua.','Duración virtual: 1.30 hs · Presencial: 2 hs.'],basePrice:8500000,subopts:[{name:'Virtual',people:'hasta 60 personas',extra:5000000,qty:0},{name:'Presencial',people:'hasta 100 personas',extra:18000000,qty:0},{name:'Presencial',people:'hasta 150 personas',extra:25000000,qty:0}]},
+  {id:'charlas',code:'CV',name:'Ciclo de Charlas Virtual',desc:['4 entrevistas. Abierto por plataforma interna.','Alcance: toda la organización.','No incluye presupuesto de entrevistado externo.'],price:6000000,subopts:null,qty:0},
+  {id:'workshops',code:'WS',name:'Workshops',desc:['PM, Producción, Post Producción, Facilitación.','Creación de diseño con dinámicas originales e innovadoras.','2 facilitadores.'],basePrice:null,subopts:[{name:'Virtual',people:'hasta 25 personas',extra:3500000,qty:0},{name:'Presencial',people:'hasta 25 personas',extra:4500000,qty:0}]},
+  {id:'boxes',code:'BX',name:'Boxes',desc:['Creación de diseño con dinámicas originales e innovadoras.','2 facilitadores.','Alcance: hasta 10 personas.'],price:2500000,subopts:null,qty:0},
+  {id:'academia',code:'AE',name:'Academia de Embajadores',desc:['Híbrido. 4 instancias de 2 hs.','Alcance: hasta 10 personas.'],price:16000000,subopts:null,qty:0}
+];
+
+var openDesc={};
+function fmt(n){return '$'+n.toLocaleString('es-AR');}
+function isActive(item){if(item.subopts)return item._open||item.subopts.some(function(s){return s.qty>0;});return item.qty>0;}
+function getPriceHint(item){if(item.subopts){if(item.basePrice)return 'Base '+fmt(item.basePrice)+' + alcance';return 'Desde '+fmt(item.subopts[0].extra);}return fmt(item.price);}
+
+function render(){
+  var list=document.getElementById('items-list');
+  list.innerHTML='';
+  data.forEach(function(item,i){
+    var active=isActive(item);
+    var div=document.createElement('div');
+    div.className='item'+(active?' active':'');
+    var chkIcon='<svg class="chk-icon" width="11" height="11" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var h='<div class="item-header" onclick="toggleItem('+i+')">';
+    h+='<div class="chk">'+chkIcon+'</div>';
+    h+='<div class="item-meta"><div class="item-code">'+item.code+'</div><div class="item-name">'+item.name+'</div><div class="item-price-hint">'+getPriceHint(item)+' + IVA</div></div>';
+    h+='<button class="detail-btn" onclick="event.stopPropagation();toggleDesc(\''+item.id+'\')">'+(openDesc[item.id]?'Cerrar ▲':'Ver detalle ▼')+'</button>';
+    if(!item.subopts&&item.qty>0&&item.id!=='discovery'){
+      h+='<div class="qty-row"><button class="qbtn minus" onclick="event.stopPropagation();chQty('+i+',-1)">−</button><span class="qnum">'+item.qty+'</span><button class="qbtn plus" onclick="event.stopPropagation();chQty('+i+',1)">+</button></div>';
+    }
+    h+='</div>';
+    var d='<div class="item-desc'+(openDesc[item.id]?' open':'')+'">';
+    item.desc.forEach(function(t){d+='<p>'+t+'</p>';});
+    d+='</div>';
+    var s='';
+    if(item.subopts){
+      s='<div class="subopts'+(active?' show':'')+'">';
+      s+='<div class="subopts-label">Elegí la modalidad</div>';
+      item.subopts.forEach(function(opt,j){
+        var optActive=opt.qty>0;
+        var optPrice=(item.basePrice||0)+opt.extra;
+        s+='<div class="subopt'+(optActive?' active':'')+'" onclick="toggleSubopt('+i+','+j+')">';
+        s+='<div class="sub-chk"><svg class="sub-chk-icon" width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+        s+='<div class="sub-info"><div class="sub-name">'+opt.name+'</div><div class="sub-people">'+opt.people+'</div></div>';
+        s+='<div class="sub-price">'+fmt(optPrice)+'</div>';
+        if(optActive){
+          s+='<div class="qty-row" style="margin-left:.4rem;" onclick="event.stopPropagation()">';
+          s+='<button class="qbtn minus" onclick="chSubQty('+i+','+j+',-1)">−</button>';
+          s+='<span class="qnum">'+opt.qty+'</span>';
+          s+='<button class="qbtn plus" onclick="chSubQty('+i+','+j+',1)">+</button>';
+          s+='</div>';
+        }
+        s+='</div>';
+      });
+      s+='</div>';
+    }
+    div.innerHTML=h+d+s;
+    list.appendChild(div);
+  });
+  renderPanel();
+}
+
+function toggleItem(i){
+  var item=data[i];
+  if(item.subopts){
+    var anyActive=item.subopts.some(function(s){return s.qty>0;});
+    if(anyActive){item.subopts.forEach(function(s){s.qty=0;});item._open=false;}
+    else{item._open=!item._open;}
+  } else {
+    item.qty=item.qty>0?0:1;
+  }
+  render();
+}
+function chQty(i,delta){data[i].qty=Math.max(0,data[i].qty+delta);render();}
+function toggleSubopt(i,j){var opt=data[i].subopts[j];opt.qty=opt.qty>0?0:1;data[i]._open=true;render();}
+function chSubQty(i,j,delta){data[i].subopts[j].qty=Math.max(0,data[i].subopts[j].qty+delta);render();}
+function toggleDesc(id){openDesc[id]=!openDesc[id];render();}
+
+function renderPanel(){
+  var list=document.getElementById('panel-list');
+  var sub=0,html='';
+  data.forEach(function(item){
+    if(item.subopts){
+      item.subopts.forEach(function(opt){
+        if(opt.qty>0){
+          var p=((item.basePrice||0)+opt.extra)*opt.qty;sub+=p;
+          var label=item.name+' · '+opt.name+' '+opt.people+(opt.qty>1?' ×'+opt.qty:'');
+          html+='<div class="pi"><span class="pi-name">'+label+'</span><span class="pi-price">'+fmt(p)+'</span></div>';
+        }
+      });
+    } else if(item.qty>0){
+      var p=item.price*item.qty;sub+=p;
+      var label=item.name+(item.qty>1?' ×'+item.qty:'');
+      html+='<div class="pi"><span class="pi-name">'+label+'</span><span class="pi-price">'+fmt(p)+'</span></div>';
+    }
+  });
+  list.innerHTML=html||'<p class="panel-empty">Agregá módulos para ver tu propuesta</p>';
+  document.getElementById('p-sub').textContent=fmt(sub);
+  document.getElementById('p-total').textContent=fmt(Math.round(sub*1.21));
+}
+
+function applyCombo(name,btn){
+  clearAll(true);
+  document.querySelectorAll('.combo-btn').forEach(function(b){b.style.borderColor='';b.style.color='';});
+  btn.style.borderColor='#2187f4';btn.style.color='#2187f4';
+  if(name==='basico'){data[0].qty=1;data[2].qty=1;}
+  else if(name==='completo'){data[0].qty=1;data[2].qty=1;data[1].subopts[0].qty=1;data[1]._open=true;data[3].subopts[0].qty=1;data[3]._open=true;}
+  else if(name==='eventos'){data[1].subopts[0].qty=1;data[1]._open=true;data[3].subopts[0].qty=2;data[3]._open=true;data[4].qty=1;}
+  render();
+}
+function clearAll(silent){
+  data.forEach(function(item){item.qty=0;item._open=false;if(item.subopts)item.subopts.forEach(function(o){o.qty=0;});});
+  if(!silent){document.querySelectorAll('.combo-btn').forEach(function(b){b.style.borderColor='';b.style.color='';});render();}
+}
+
+// Footer particles
+(function(){
+  var pc=document.getElementById('footer-particles');
+  if(!pc)return;
+  ['#2187f4','#4aa3ff','#ffffff'].forEach(function(c){
+    for(var i=0;i<12;i++){
+      var p=document.createElement('div');
+      p.className='particle';
+      var s=Math.random()*3+1;
+      p.style.cssText='width:'+s+'px;height:'+s+'px;background:'+c+';left:'+Math.random()*100+'%;animation-duration:'+(Math.random()*14+7)+'s;animation-delay:'+(Math.random()*12)+'s;';
+      pc.appendChild(p);
+    }
+  });
+})();
+
+render();
+</script>
+</body>
+</html>
